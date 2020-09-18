@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block extracss %}
+	<link rel="stylesheet" href="static/css/Login-Form-Clean.css">
+	<link rel="stylesheet" href="static/css/animate.min.css">
+{% endblock %}
+
+{% block main %}
+  <div class="login-clean">
+    <form>
+      <h2 class="sr-only">Register Form</h2>
+      <div class="illustration"><i class="icon ion-speakerphone"></i></div>
+      <div class="form-group"><input class="form-control" id="name" type="text" name="name" placeholder="Name"></div>
+      <div class="form-group"><input class="form-control" id="email" type="email" name="email" placeholder="Email"></div>
+      <div class="form-group"><input class="form-control" id="password" type="password" name="password" placeholder="Password"></div>
+      <div class="form-group"><input class="form-control" id="confirmpassword" type="password" name="confirm-password" placeholder="Password (again)"></div>
+      <div class="form-group"><button id="registerbtn" class="btn btn-primary btn-block" data-bs-hover-animate="shake" type="button">Register</button></div>
+      <a class="forgot" href="/login">Already got an account?</a>
+    </form>
+  </div>
+{% endblock %}
+
+{% block extrajs %}
+	<script>
+		$("#registerbtn").click(function(){
+			$.ajax({
+			type: "POST",
+			url: "register",
+			processData: false,
+			contentType: "application/json",
+			data: '{ "name": "' + $("#name").val() + '", "email": "'+ $("#email").val() +'", "password": "'+ $("#password").val() +'", "confirm-password": "'+ $("#confirmpassword").val() +'" }',
+			success: function(r) {
+        console.log(r)
+				window.location.href = "http://localhost:5000/dashboard";
+			},
+			error: function(r) {
+					setTimeout(function() {
+					$("#loginbtn").removeClass('animated shake');
+					}, 1000)
+					$("#loginbtn").addClass('animated shake')
+					console.log(r)
+			}
+			});
+		});
+	</script>
+{% endblock %}

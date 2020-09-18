@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Dashboard
+{% endblock %}
+
+{% block main %}
+    <div style="padding-top: 40pt;" class="container">
+        <h2><strong>Blogs</strong></h2>
+
+        <ul style="list-style-type: none; margin: 0; padding: 2px;" id="blogsList">
+            {% if blogsLength > 0 %}
+                {% for blog in blogs %}
+                    <li onclick="console.log('blog clicked')" class="blog">
+                        <strong class="blogTitle">{{ blog.title }}</strong>
+                        <p class="small blogBlurb">{{ blog.description }}</p>
+                        <ul class="categories">
+                            {% for category in blog.categories %}
+                                <li>{{ category }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <p class="small">You currently have no blogs.</p>
+                <a class="btn btn-primary" href="/blogs/create">Create one!</a>
+            {% endif %}
+        </ul>
+    </div>
+{% endblock %}

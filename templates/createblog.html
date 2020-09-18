@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Create a blog
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <form method="post" id="mainForm" style="padding-top: 40px;">
+        <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="blogName">Name (alphanumeric)</label>
+            <input name="name" type="text" patten="^[a-zA-Z0-9_]*$" class="form-control" id="blogName">
+        </div>
+        </div>
+        <p class="small">https://speakup.ml/blogs/<span id="urlBlogName" style="color:#2ecc71; font-weight: bold;" class="blogName"></span></p>
+        <div class="form-group">
+        <label for="inputDesc">Description</label>
+        <input name="description" type="text" class="form-control" id="inputDesc" placeholder="A brief description of your blog..">
+        </div>
+        <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="inputState">Category</label>
+            <select name="category" id="inputState" class="form-control">
+                {% for category in categories %}
+                    <option>{{category}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        </div>
+        <button id="createBlog" disabled="true" type="submit" class="btn btn-primary">Create Blog</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script>
+function changed() {
+    const bool1 = /^[a-zA-Z0-9_]*$/.test(document.getElementById("blogName").value) && document.getElementById("blogName").value != "";
+    const bool2 = document.getElementById("inputDesc").value != "";
+
+    if (bool1 && bool2){
+        $("#createBlog").removeAttr("disabled");
+    } else {
+        $("#createBlog").prop("disabled", "true");
+    }
+}
+
+window.onload= function(){
+    document.getElementById("mainForm").addEventListener("change", changed);
+    document.getElementById("mainForm").addEventListener("keyup", changed);
+}
+
+nameInput = document.getElementById("blogName");
+
+nameInput.addEventListener("keyup", function () {
+    $("#urlBlogName").text(nameInput.value);
+    if (/^[a-zA-Z0-9_]*$/.test(nameInput.value)) {
+        $("#urlBlogName").css("color", "#2ecc71");
+    } else {
+        $("#urlBlogName").css("color", "red");
+    }
+});
+</script>
+{% endblock %}
+
+{% block extracss %}
+<style>
+    input[pattern]:invalid > #urlBlogName {
+        color:red !important;
+    }
+</style>
+{% endblock %}
