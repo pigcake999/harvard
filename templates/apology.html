@@ -6,5 +6,13 @@
 
 {% block main %}
 <div class="container" style="margin-top: 40px;">We're sorry,
-    {{ message }}</div>
+    {{ message|safe }}</div>
+{% endblock %}
+
+{% block extracss %}
+<style>
+    a {
+        margin-top: 5px;
+    }
+</style>
 {% endblock %}

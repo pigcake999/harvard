@@ -10,7 +10,8 @@
     
     <div id="blogPosts">
         <h3 style="font-size: 22px;">Posts</h3>
-        <a style="margin-right: 15px;" class="btn btn-primary" href="/blogs/test/posts/create">Create a post</a>
+        <a style="margin-right: 15px;" class="btn btn-primary" href="/blogs/{{ name }}/posts/create">Create a post</a>
+        <button style="margin-right: 15px;" data-toggle="modal" data-target="#editpost" class="btn btn-success">Edit a post</button>
         <button class="btn btn-danger" data-toggle="modal" data-target="#deletepost">Delete a post</button>
     </div>
     <hr>
@@ -34,6 +35,30 @@
               {% for post in posts %}
                 <li class="blogPost">
                     <a style="color:red !important" href="/delete/{{name}}/{{post.link}}">{{ post.title }}</a>
+                </li>
+              {% endfor %}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="editpost" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit a post</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <ul class="blogPosts">
+              {% for post in posts %}
+                <li class="blogPost">
+                    <a style="color:#22bb11; !important" href="/blogs/{{name}}/posts/{{post.link}}/edit">{{ post.title }}</a>
                 </li>
               {% endfor %}
           </ul>

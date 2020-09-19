@@ -1,16 +1,13 @@
-import os
-
+import os, random, string, markdown2
 from cs50 import SQL
 from flask import Flask, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
-import markdown2
+from mailjet_rest import Client
 
 restricted = ["create", "edit", ""]
-
-from mailjet_rest import Client
 
 api_key = '4f3c956860456e687b6c181e48aaedab'
 api_secret = '5ac9350dac389b2b7d73832ad4038ed0'
@@ -64,8 +61,6 @@ def message(msg):
 
 @app.route("/")
 def index():
-    if session.get("user_id"):
-        return redirect("/dashboard")
     return render_template("index.html")
 
 @app.route("/login", methods=["GET", "POST"])
@@ -181,7 +176,7 @@ def blog():
                 db.execute("INSERT INTO blogs (id, user_id, description, category) VALUES (:name, :user_id, :description, :category)", name=request.form["name"].lower(), user_id=session.get("user_id"), description=request.form["description"], category=request.form["category"])
                 return redirect("/dashboard")
             else:
-                return apology("That blog name is not available.")
+                return apology("That blog name is not available.<br><a class='btn btn-primary' href='/dashboard'>Return to dashboard</a>")
         else: 
             if session.get("user_id"):
                 categories = [
@@ -234,70 +229,80 @@ def blog():
 @app.route("/blogs/edit/<name>")
 def edit(name):
     blog = db.execute("SELECT user_id FROM blogs WHERE id=:id", id=name)
-    if str(session.get("user_id")) == str(blog[0]["user_id"]):
-        posts = db.execute("SELECT * FROM posts WHERE blog_id=:name", name=name.lower())
-        return render_template("editblog.html", posts=posts, name=name.lower())
-    else:
-        return apology("You don't own that blog!")
+    if session.get("user_id"):
+        if str(session.get("user_id")) == str(blog[0]["user_id"]):
+            posts = db.execute("SELECT * FROM posts WHERE blog_id=:name", name=name.lower())
+            return render_template("editblog.html", posts=posts, name=name.lower())
+        else:
+            return apology("You don't own that blog!<br><a class='btn btn-primary' href='/dashboard'>Return to dashboard</a>")
 
 @app.route("/blogs/<name>/posts/create", methods=["GET", "POST"])
 def createpost(name):
     blog = db.execute("SELECT user_id FROM blogs WHERE id=:id", id=name)
-    if str(session.get("user_id")) == str(blog[0]["user_id"]):
-        if request.method == "GET":
-            return render_template("createpost.html", name=name.lower())
-        else:
-            posts = db.execute("SELECT * FROM posts WHERE blog_id=:name AND link=:link", name=name.lower(), link=request.form["link"].lower())
-
-            if len(posts) > 0 or request.form["title"] in restricted:
-                return apology("You already have a post with that name.")
+    if session.get("user_id"):
+        if str(session.get("user_id")) == str(blog[0]["user_id"]):
+            if request.method == "GET":
+                return render_template("createpost.html", name=name.lower())
             else:
-                post = request.form
-                db.execute("INSERT INTO posts (link, title, description, blog_id) VALUES (:link, :title, :blurb, :blog_id)", link=post["link"].lower(), title=post["title"], blurb=post["blurb"], blog_id=name)
+                posts = db.execute("SELECT * FROM posts WHERE blog_id=:name AND link=:link", name=name.lower(), link=request.form["link"].lower())
 
-                getpost = db.execute("SELECT id FROM posts WHERE link=:link AND blog_id=:name", link=post["link"].lower(),  name=name)
+                if len(posts) > 0 or request.form["link"] in restricted:
+                    return apology("You already have a post with that name.<br><a class='btn btn-primary' href='/dashboard'>Return to dashboard</a>")
+                else:
+                    post = request.form
+                    db.execute("INSERT INTO posts (link, title, description, blog_id) VALUES (:link, :title, :blurb, :blog_id)", link=post["link"].lower(), title=post["title"], blurb=post["blurb"], blog_id=name)
 
-                with open(os.getcwd() + "/posts/" + str(getpost[0]["id"]) + ".md", "w+") as f:
-                    f.write(post["markdown"])
+                    getpost = db.execute("SELECT id FROM posts WHERE link=:link AND blog_id=:name", link=post["link"].lower(),  name=name)
 
-                return redirect("/blogs/" + name + "/posts/" + post["link"])
-    else:
-        return apology("You don't own that blog!")
+                    with open(os.getcwd() + "/posts/" + str(getpost[0]["id"]) + ".md", "w+") as f:
+                        f.write(post["markdown"])
+
+                    return redirect("/blogs/" + name + "/posts/" + post["link"])
+        else:
+            return apology("You don't own that blog!<br><a class='btn btn-primary' href='/dashboard'>Return to dashboard</a>")
 
 @app.route("/blogs/<name>")
 def viewblog(name):
     blog = db.execute("SELECT * FROM blogs WHERE id=:name", name=name.lower())
     posts = db.execute("SELECT * FROM posts WHERE blog_id=:name", name=name.lower())
-    user = db.execute("SELECT name FROM users WHERE id=:id", id=int(blog[0]["user_id"]))
-    return render_template("blog/index.html", blog=blog[0], posts=posts, author=user[0]["name"])
+    user = db.execute("SELECT * FROM users WHERE id=:id", id=int(blog[0]["user_id"]))
+    owned = False
+    if session.get("user_id"):
+        if str(blog[0]["user_id"]) == str(user[0]["id"]):
+            owned = True
+    return render_template("blog/index.html", blog=blog[0], posts=posts, author=user[0]["name"], owned=owned)
 
 @app.route("/blogs/<name>/posts/<postname>")
 def viewpost(name, postname):
     blog = db.execute("SELECT * FROM blogs WHERE id=:name", name=name.lower())
     posts = db.execute("SELECT * FROM posts WHERE blog_id=:name AND link=:link", name=name.lower(), link=postname.lower())
-    user = db.execute("SELECT name FROM users WHERE id=:id", id=int(blog[0]["user_id"]))
+    user = db.execute("SELECT * FROM users WHERE id=:id", id=int(blog[0]["user_id"]))
     with open(os.getcwd() + "/posts/" + str(posts[0]["id"]) + ".md", "r") as f:
         content = f.read()
         content = markdown2.markdown(content)
-        return render_template("blog/post.html", blog=blog[0], post=posts[0], author=user[0]["name"], markdown=content)
+        owned = False
+        if session.get("user_id"):
+            if str(blog[0]["user_id"]) == str(user[0]["id"]):
+                owned = True
+        return render_template("blog/post.html", blog=blog[0], post=posts[0], author=user[0]["name"], markdown=content, owned=owned)
 
 @app.route("/delete/<name>/<postname>")
 def deletepost(name, postname):
     blog = db.execute("SELECT user_id FROM blogs WHERE id=:id", id=name)
     if str(session.get("user_id")) == str(blog[0]["user_id"]):
         db.execute("DELETE FROM posts WHERE link=:link", link=postname)
-        return message("Post deleted!")
+        return message("Post deleted!<br><a class='btn btn-primary' href='/dashboard'>Return to dashboard</a>")
     else:
-        return apology("You don't own that blog!")
+        return apology("You don't own that blog!<br><a class='btn btn-primary' href='/dashboard'>Return to dashboard</a>")
 
 @app.route("/delete/<name>")
 def deleteblog(name):
     blog = db.execute("SELECT user_id FROM blogs WHERE id=:id", id=name)
     if str(session.get("user_id")) == str(blog[0]["user_id"]):
         db.execute("DELETE FROM blogs WHERE id=:id", id=name)
-        return message("Blog deleted!")
+        return message("Blog deleted!<br><a class='btn btn-primary' href='/dashboard'>Return to dashboard</a>")
     else:
-        return apology("You don't own that blog!")
+        return apology("You don't own that blog!<br><a class='btn btn-primary' href='/dashboard'>Return to dashboard</a>")
 
 @app.route("/about")
 def about():
@@ -321,12 +326,10 @@ def forgot():
             check = db.execute("SELECT id FROM forgot WHERE email=:email", email=request.form["email"])
             
             if len(check) > 0:
-                return apology("That account has already requested a password reset.")
+                return apology("That account has already requested a password reset.<br><a class='btn btn-primary' href='/login'>Return to login</a>")
             else:
-                db.execute("INSERT INTO forgot (email) VALUES (:email)", email=request.form["email"])
-
-                getid = db.execute("SELECT id FROM forgot WHERE email=:email", email=request.form["email"])
-                getid = getid[0]["id"]
+                getid = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+                db.execute("INSERT INTO forgot (id, email) VALUES (:id, :email)", id=getid, email=request.form["email"])
 
                 data = {
                     'Messages': [
@@ -349,14 +352,19 @@ def forgot():
                 print(result.status_code)
                 print(result.json())
 
-                return message("Check your email for a password reset link.")
+                return message("Check your email for a password reset link.<br><a class='btn btn-primary' href='/login'>Return to login</a>")
         else:
-            return apology("There is no account with that email.")
+            return apology("There is no account with that email.<br><a class='btn btn-primary' href='/login'>Return to login</a>")
 
 @app.route("/reset/<id>", methods=["GET", "POST"])
 def reset(id):
     if request.method == "GET":
-        return render_template("auth/reset.html")
+        ids = db.execute("SELECT * FROM forgot WHERE id=:id", id=id)
+        
+        if len(ids) > 0:
+            return render_template("auth/reset.html")
+        else:
+            return redirect("/login")
     else:
         if request.form["password"] == request.form["confirm"]:
             hashed = generate_password_hash(request.form["password"])
@@ -365,10 +373,43 @@ def reset(id):
 
             db.execute("UPDATE users SET password=:hashed WHERE email=:email", hashed=hashed, email=getemail)
 
-            return message("Passwords changed.")
+            db.execute("DELETE FROM forgot WHERE email=:email", email=getemail)
+
+            return message("Passwords changed.<br><a class='btn btn-primary' href='/login'>Return to login</a>")
         else:
-            return apology("Passwords didn't match.")
+            return apology("Passwords didn't match.<br><a class='btn btn-primary' href='/login'>Return to login</a>")
 
 @app.route("/blogs")
 def weirdlink():
-    return redirect("/")
+    return redirect("/dashboard")
+
+@app.route("/blogs/<name>/posts/<postname>/edit", methods=["GET", "POST"])
+def editpost(name, postname):
+    blog = db.execute("SELECT user_id FROM blogs WHERE id=:id", id=name)
+    if session.get("user_id"):
+        if str(session.get("user_id")) == str(blog[0]["user_id"]):
+            if request.method == "GET":
+                info = db.execute("SELECT * FROM posts WHERE blog_id=:name AND link=:link", name=name, link=postname)
+                if len(info) > 0:
+                    with open(os.getcwd() + "/posts/" + str(info[0]["id"]) + ".md", "r") as f:
+                        content = f.read()
+                        return render_template("editpost.html", name=name.lower(), info=info[0], content=content)
+                else:
+                    return apology("That post doesn't exist or you don't own that blog!<br><a class='btn btn-primary' href='/dashboard'>Return to dashboard</a>")
+            else:
+                posts = db.execute("SELECT * FROM posts WHERE blog_id=:name AND link=:link", name=name.lower(), link=postname)
+
+                if len(posts) < 1:
+                    return apology("That post no longer exists.<br><a class='btn btn-primary' href='/blogs/"+name+"'>Return to blog</a>")
+                else:
+                    post = request.form
+                    db.execute("UPDATE posts SET link=:link, title=:title, description=:blurb, blog_id=:blog_id WHERE link=:oldlink", link=post["link"].lower(), title=post["title"], blurb=post["blurb"], blog_id=name, oldlink=postname)
+
+                    getpost = db.execute("SELECT id FROM posts WHERE link=:link AND blog_id=:name", link=post["link"].lower(),  name=name)
+
+                    with open(os.getcwd() + "/posts/" + str(getpost[0]["id"]) + ".md", "w+") as f:
+                        f.write(post["markdown"])
+
+                    return redirect("/blogs/" + name + "/posts/" + post["link"])
+        else:
+            return apology("You don't own that blog!<br><a class='btn btn-primary' href='/dashboard'>Return to dashboard</a>")

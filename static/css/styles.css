@@ -100,3 +100,8 @@ footer {
   margin-right: 20px;
 }
 
+#editor {
+  padding: 5px;
+  border-radius: 3px;
+  border: 2px #eee solid;
+}

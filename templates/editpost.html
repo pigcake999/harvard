@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Create a post
+    Edit post
 {% endblock %}
 
 {% block main %}
@@ -10,26 +10,26 @@
         <div class="form-row">
         <div class="form-group col-md-4">
             <label for="postName">Link (alphanumeric)</label>
-            <input name="link" type="text" patten="^[a-zA-Z0-9_]*$" class="form-control" id="blogName">
+            <input value="{{ info.link }}" name="link" type="text" patten="^[a-zA-Z0-9_]*$" class="form-control" id="blogName">
         </div>
         </div>
         <p class="small">https://speakup.ml/blogs/{{name}}/posts/<span id="urlBlogName" style="color:#2ecc71; font-weight: bold;" class="blogName"></span></p>
         <div class="form-group">
             <label for="inputDesc">Title</label>
-            <input name="title" type="text" class="form-control" id="inputDesc" placeholder="Title of your post..">
+            <input value="{{ info.title }}" name="title" type="text" class="form-control" id="inputDesc" placeholder="Title of your post..">
         </div>
         <div class="form-group">
-            <label for="inputDesc">Blurb</label>
-            <input name="blurb" type="text" class="form-control" id="inputDesc" placeholder="A brief explanation of the post..">
+            <label for="inputDesc2">Blurb</label>
+            <input value="{{ info.description }}" name="blurb" type="text" class="form-control" id="inputDesc2" placeholder="A brief explanation of the post..">
         </div>
         <hr>
         <div class="form-group">
-            <textarea placeholder="Write a nice little post.." name="markdown" id="editor" cols="50" rows="10"></textarea>
+            <textarea placeholder="Write a nice little post.." name="markdown" id="editor" cols="50" rows="10">{{ content }}</textarea>
         </div>
         <!-- <div class="form-group">
             <a href="javascript:edit()">Click Here For Full Editor</a>
         </div> -->
-        <button id="createPost" disabled="true" type="submit" class="btn btn-primary">Create Post</button>
+        <button id="editPost" disabled="true" type="submit" class="btn btn-primary">Edit Post</button>
     </form>
 </div>
 {% endblock %}
@@ -44,9 +44,9 @@ function changed() {
     const bool3 = val != "";
 
     if (bool1 && bool2 && bool3){
-        $("#createPost").removeAttr("disabled");
+        $("#editPost").removeAttr("disabled");
     } else {
-        $("#createPost").prop("disabled", "true");
+        $("#editPost").prop("disabled", "true");
     }
 }
 
@@ -66,8 +66,6 @@ function edit(){
 const el = document.querySelector('textarea');
   const stackedit = new Stackedit();
 
-  // Open the iframe
-
   // Listen to StackEdit events and apply the changes to the textarea.
   stackedit.on('fileChange', (file) => {
     el.value = file.content.text;
@@ -82,6 +80,8 @@ window.onload= function(){
     document.getElementById("inputDesc2").addEventListener("keyup", changed);
     document.getElementById("postName").addEventListener("change", changed);
     document.getElementById("postName").addEventListener("keyup", changed);
+
+    changed()
 }
 
 nameInput = document.getElementById("blogName");
