@@ -46,6 +46,8 @@ function changed() {
     }
 }
 
+setInterval(changed, 3000)
+
 window.onload= function(){
     document.getElementById("mainForm").addEventListener("change", changed);
     document.getElementById("mainForm").addEventListener("keyup", changed);
