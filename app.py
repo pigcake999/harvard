@@ -123,6 +123,11 @@ def register():
         elif details["password"] != details["confirm-password"]:
             return jsonify(error="Sorry, passwords didn't match. Try Again!"), 401
 
+        rows = db.execute("SELECT * FROM users WHERE email = :email", email=details["email"])
+
+        if len(rows) > 0:
+            return jsonify(error="An account already exists with that email!", 401)
+
         # Hash password
         hashed = generate_password_hash(details["password"])
 
