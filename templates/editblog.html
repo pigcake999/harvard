@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Editing {{ name }}
+{% endblock %}
+
+{% block main %}
+<div style="font-family: Montserrat, sans-serif;" class="container">
+    <h1 style="margin: 20px 0;">Editing {{ name }}</h1>
+    
+    <div id="blogPosts">
+        <h3 style="font-size: 22px;">Posts</h3>
+        <a style="margin-right: 15px;" class="btn btn-primary" href="/blogs/test/posts/create">Create a post</a>
+        <button class="btn btn-danger" data-toggle="modal" data-target="#deletepost">Delete a post</button>
+    </div>
+</div>
+
+<div class="modal fade" id="deletepost" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Delete a post</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <ul class="blogPosts">
+              {% for post in posts %}
+                <li class="blogPost">
+                    {{ post.title }}
+                </li>
+              {% endfor %}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extrajs %}
+<script>
+function changed() {
+    const bool1 = /^[a-zA-Z0-9_]*$/.test(document.getElementById("blogName").value) && document.getElementById("blogName").value != "";
+    const bool2 = document.getElementById("inputDesc").value != "";
+
+    if (bool1 && bool2){
+        $("#createBlog").removeAttr("disabled");
+    } else {
+        $("#createBlog").prop("disabled", "true");
+    }
+}
+
+window.onload= function(){
+    document.getElementById("mainForm").addEventListener("change", changed);
+    document.getElementById("mainForm").addEventListener("keyup", changed);
+}
+
+nameInput = document.getElementById("blogName");
+
+nameInput.addEventListener("keyup", function () {
+    $("#urlBlogName").text(nameInput.value);
+    if (/^[a-zA-Z0-9_]*$/.test(nameInput.value)) {
+        $("#urlBlogName").css("color", "#2ecc71");
+    } else {
+        $("#urlBlogName").css("color", "red");
+    }
+});
+</script>
+{% endblock %}
+
+{% block extracss %}
+<style>
+    input[pattern]:invalid > #urlBlogName {
+        color:red !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,23 @@
+.blog {
+    background: rgba(225,225,225,0.3);
+    padding: 12px;
+    border-radius: 2px;
+    max-width: 40vw;
+    font-family: Montserrat;
+}
+
+.blogName {
+    font-size: 16pt;
+    font-weight: 500;
+}
+
+.blogCategory {
+    font-size: 11px;
+    background-color: #555;
+    color: white;
+    padding: 3px;
+    border-radius: 25px;
+    max-width: 20%;
+    min-width: 80px;
+    text-align: center;
+}

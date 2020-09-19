@@ -7,6 +7,8 @@ from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 
+restricted = ["create", "edit", ""]
+
 # from dotenv import load_dotenv
 # dotenv_path = join(dirname(__file__), '.env')  # Path to .env file
 # load_dotenv(dotenv_path)
@@ -161,17 +163,16 @@ def dashboard():
     else:
         return redirect("/login")
 
-@app.route("/blogs/<name>", methods=["GET", "POST"])
-def blog(name):
-    if (name == "create"):
+@app.route("/blogs/create", methods=["GET", "POST"])
+def blog():
         if request.method == "POST":
             availability = db.execute("SELECT * FROM blogs WHERE id=:id", id=request.form["name"])
             
-            if len(availability) == 0:
+            if len(availability) == 0 and request.form["name"] not in restricted:
                 db.execute("INSERT INTO blogs (id, user_id, description, category) VALUES (:name, :user_id, :description, :category)", name=request.form["name"], user_id=session.get("user_id"), description=request.form["description"], category=request.form["category"])
                 return redirect("/dashboard")
             else:
-                return apology("Blog name not available.")
+                return apology("That blog name is not available.")
         else: 
             if session.get("user_id"):
                 categories = [
@@ -220,3 +221,53 @@ def blog(name):
                 return render_template("createblog.html", categories=categories)
             else:
                 return redirect("/login")
+
+@app.route("/blogs/edit/<name>")
+def edit(name):
+    posts = db.execute("SELECT * FROM posts WHERE blog_id=:name", name=name)
+    return render_template("editblog.html", name=name)
+
+@app.route("/blogs/<name>/posts/create", methods=["GET", "POST"])
+def createpost(name):
+    if request.method == "GET":
+        return render_template("createpost.html", name=name)
+    else:
+        posts = db.execute("SELECT * FROM posts WHERE blog_id=:name AND title=:title", name=name, title=request.form["title"])
+
+        if len(posts) > 0 or request.form["title"] in restricted:
+            return apology("You already have a post with that name.")
+        else:
+            post = request.form
+            db.execute("INSERT INTO posts (title, description, blog_id) VALUES (:title, :blurb, :blog_id)", title=post["title"], blurb=post["blurb"], blog_id=name)
+
+            getpost = db.execute("SELECT id FROM posts WHERE title=:title AND blog_id=:name", title=post["title"],  name=name)
+
+            with open(os.getcwd() + "/posts/" + str(getpost[0]["id"]) + ".md", "w+") as f:
+                f.write(post["markdown"])
+
+            return redirect("/blogs/" + name + "/posts/" + post["title"])
+
+@app.route("/blogs/<name>/posts/create", methods=["GET", "POST"])
+def viewpost(name):
+    if request.method == "GET":
+        return render_template("createpost.html", name=name)
+    else:
+        posts = db.execute("SELECT * FROM posts WHERE blog_id=:name AND title=:title", name=name, title=request.form["title"])
+
+        if len(posts) > 0:
+            return apology("You already have a post with that name.")
+        else:
+            post = request.form
+            db.execute("INSERT INTO posts (title, description, blog_id) VALUES (:title, :blurb, :blog_id)", title=post["title"], blurb=post["blurb"], blog_id=name)
+
+            getpost = db.execute("SELECT id FROM posts WHERE title=:title AND blog_id=:name", title=post["title"],  name=name)
+
+            with open(os.getcwd() + "/posts/" + str(getpost[0]["id"]) + ".md", "w+") as f:
+                f.write(post["markdown"])
+
+            return redirect("/blogs/" + name + "/posts/" + post["title"])
+
+@app.route("/blogs/<name>")
+def viewblog(name):
+    blog = db.execute("SELECT * FROM blogs WHERE user_id=:user_id AND id=:name", user_id=session.get("user_id"), name=name)
+    return render_template("blog/index.html", blog=blog[0])
