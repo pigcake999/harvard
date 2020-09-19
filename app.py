@@ -368,3 +368,7 @@ def reset(id):
             return message("Passwords changed.")
         else:
             return apology("Passwords didn't match.")
+
+@app.route("/blogs")
+def weirdlink():
+    return redirect("/")
