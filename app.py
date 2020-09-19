@@ -6,8 +6,15 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
+import markdown2
 
 restricted = ["create", "edit", ""]
+
+from mailjet_rest import Client
+
+api_key = '4f3c956860456e687b6c181e48aaedab'
+api_secret = '5ac9350dac389b2b7d73832ad4038ed0'
+mailjet = Client(auth=(api_key, api_secret), version='v3.1')
 
 # from dotenv import load_dotenv
 # dotenv_path = join(dirname(__file__), '.env')  # Path to .env file
@@ -52,6 +59,8 @@ db = SQL("sqlite:///speakup.db")
 
 def apology(msg):
     return render_template("apology.html", message=msg)
+def message(msg):
+    return render_template("message.html", message=msg)
 
 @app.route("/")
 def index():
@@ -166,10 +175,10 @@ def dashboard():
 @app.route("/blogs/create", methods=["GET", "POST"])
 def blog():
         if request.method == "POST":
-            availability = db.execute("SELECT * FROM blogs WHERE id=:id", id=request.form["name"])
+            availability = db.execute("SELECT * FROM blogs WHERE id=:id", id=request.form["name"].lower())
             
             if len(availability) == 0 and request.form["name"] not in restricted:
-                db.execute("INSERT INTO blogs (id, user_id, description, category) VALUES (:name, :user_id, :description, :category)", name=request.form["name"], user_id=session.get("user_id"), description=request.form["description"], category=request.form["category"])
+                db.execute("INSERT INTO blogs (id, user_id, description, category) VALUES (:name, :user_id, :description, :category)", name=request.form["name"].lower(), user_id=session.get("user_id"), description=request.form["description"], category=request.form["category"])
                 return redirect("/dashboard")
             else:
                 return apology("That blog name is not available.")
@@ -224,50 +233,138 @@ def blog():
 
 @app.route("/blogs/edit/<name>")
 def edit(name):
-    posts = db.execute("SELECT * FROM posts WHERE blog_id=:name", name=name)
-    return render_template("editblog.html", name=name)
+    blog = db.execute("SELECT user_id FROM blogs WHERE id=:id", id=name)
+    if str(session.get("user_id")) == str(blog[0]["user_id"]):
+        posts = db.execute("SELECT * FROM posts WHERE blog_id=:name", name=name.lower())
+        return render_template("editblog.html", posts=posts, name=name.lower())
+    else:
+        return apology("You don't own that blog!")
 
 @app.route("/blogs/<name>/posts/create", methods=["GET", "POST"])
 def createpost(name):
-    if request.method == "GET":
-        return render_template("createpost.html", name=name)
-    else:
-        posts = db.execute("SELECT * FROM posts WHERE blog_id=:name AND title=:title", name=name, title=request.form["title"])
-
-        if len(posts) > 0 or request.form["title"] in restricted:
-            return apology("You already have a post with that name.")
+    blog = db.execute("SELECT user_id FROM blogs WHERE id=:id", id=name)
+    if str(session.get("user_id")) == str(blog[0]["user_id"]):
+        if request.method == "GET":
+            return render_template("createpost.html", name=name.lower())
         else:
-            post = request.form
-            db.execute("INSERT INTO posts (title, description, blog_id) VALUES (:title, :blurb, :blog_id)", title=post["title"], blurb=post["blurb"], blog_id=name)
+            posts = db.execute("SELECT * FROM posts WHERE blog_id=:name AND link=:link", name=name.lower(), link=request.form["link"].lower())
 
-            getpost = db.execute("SELECT id FROM posts WHERE title=:title AND blog_id=:name", title=post["title"],  name=name)
+            if len(posts) > 0 or request.form["title"] in restricted:
+                return apology("You already have a post with that name.")
+            else:
+                post = request.form
+                db.execute("INSERT INTO posts (link, title, description, blog_id) VALUES (:link, :title, :blurb, :blog_id)", link=post["link"].lower(), title=post["title"], blurb=post["blurb"], blog_id=name)
 
-            with open(os.getcwd() + "/posts/" + str(getpost[0]["id"]) + ".md", "w+") as f:
-                f.write(post["markdown"])
+                getpost = db.execute("SELECT id FROM posts WHERE link=:link AND blog_id=:name", link=post["link"].lower(),  name=name)
 
-            return redirect("/blogs/" + name + "/posts/" + post["title"])
+                with open(os.getcwd() + "/posts/" + str(getpost[0]["id"]) + ".md", "w+") as f:
+                    f.write(post["markdown"])
 
-@app.route("/blogs/<name>/posts/create", methods=["GET", "POST"])
-def viewpost(name):
-    if request.method == "GET":
-        return render_template("createpost.html", name=name)
+                return redirect("/blogs/" + name + "/posts/" + post["link"])
     else:
-        posts = db.execute("SELECT * FROM posts WHERE blog_id=:name AND title=:title", name=name, title=request.form["title"])
-
-        if len(posts) > 0:
-            return apology("You already have a post with that name.")
-        else:
-            post = request.form
-            db.execute("INSERT INTO posts (title, description, blog_id) VALUES (:title, :blurb, :blog_id)", title=post["title"], blurb=post["blurb"], blog_id=name)
-
-            getpost = db.execute("SELECT id FROM posts WHERE title=:title AND blog_id=:name", title=post["title"],  name=name)
-
-            with open(os.getcwd() + "/posts/" + str(getpost[0]["id"]) + ".md", "w+") as f:
-                f.write(post["markdown"])
-
-            return redirect("/blogs/" + name + "/posts/" + post["title"])
+        return apology("You don't own that blog!")
 
 @app.route("/blogs/<name>")
 def viewblog(name):
-    blog = db.execute("SELECT * FROM blogs WHERE user_id=:user_id AND id=:name", user_id=session.get("user_id"), name=name)
-    return render_template("blog/index.html", blog=blog[0])
+    blog = db.execute("SELECT * FROM blogs WHERE id=:name", name=name.lower())
+    posts = db.execute("SELECT * FROM posts WHERE blog_id=:name", name=name.lower())
+    user = db.execute("SELECT name FROM users WHERE id=:id", id=int(blog[0]["user_id"]))
+    return render_template("blog/index.html", blog=blog[0], posts=posts, author=user[0]["name"])
+
+@app.route("/blogs/<name>/posts/<postname>")
+def viewpost(name, postname):
+    blog = db.execute("SELECT * FROM blogs WHERE id=:name", name=name.lower())
+    posts = db.execute("SELECT * FROM posts WHERE blog_id=:name AND link=:link", name=name.lower(), link=postname.lower())
+    user = db.execute("SELECT name FROM users WHERE id=:id", id=int(blog[0]["user_id"]))
+    with open(os.getcwd() + "/posts/" + str(posts[0]["id"]) + ".md", "r") as f:
+        content = f.read()
+        content = markdown2.markdown(content)
+        return render_template("blog/post.html", blog=blog[0], post=posts[0], author=user[0]["name"], markdown=content)
+
+@app.route("/delete/<name>/<postname>")
+def deletepost(name, postname):
+    blog = db.execute("SELECT user_id FROM blogs WHERE id=:id", id=name)
+    if str(session.get("user_id")) == str(blog[0]["user_id"]):
+        db.execute("DELETE FROM posts WHERE link=:link", link=postname)
+        return message("Post deleted!")
+    else:
+        return apology("You don't own that blog!")
+
+@app.route("/delete/<name>")
+def deleteblog(name):
+    blog = db.execute("SELECT user_id FROM blogs WHERE id=:id", id=name)
+    if str(session.get("user_id")) == str(blog[0]["user_id"]):
+        db.execute("DELETE FROM blogs WHERE id=:id", id=name)
+        return message("Blog deleted!")
+    else:
+        return apology("You don't own that blog!")
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
+
+@app.route("/faq")
+def faq():
+    return render_template("faq.html")
+
+@app.route("/forgot", methods=["GET", "POST"])
+def forgot():
+    if request.method == "GET":
+        return render_template("auth/forgotpassword.html")
+    else:
+        users = db.execute("SELECT * FROM users WHERE email=:email", email=request.form["email"])
+        if len(users) > 0:
+            check = db.execute("SELECT id FROM forgot WHERE email=:email", email=request.form["email"])
+            
+            if len(check) > 0:
+                return apology("That account has already requested a password reset.")
+            else:
+                db.execute("INSERT INTO forgot (email) VALUES (:email)", email=request.form["email"])
+
+                getid = db.execute("SELECT id FROM forgot WHERE email=:email", email=request.form["email"])
+                getid = getid[0]["id"]
+
+                data = {
+                    'Messages': [
+                        {
+                            "From": {
+                                "Email": "999pigcake@gmail.com",
+                                "Name": "SpeakUp"
+                            },
+                            "To": [
+                                {
+                                "Email": request.form["email"]
+                                }
+                            ],
+                            "Subject": "Reset your password.",
+                            "HTMLPart": "<h3>Reset your password</h3><a href='http://localhost:5000/reset/"+str(getid)+"'>http://localhost:5000/reset/"+str(getid)+"</a>",
+                            }
+                    ]
+                }
+                result = mailjet.send.create(data=data)
+                print(result.status_code)
+                print(result.json())
+
+                return message("Check your email for a password reset link.")
+        else:
+            return apology("There is no account with that email.")
+
+@app.route("/reset/<id>", methods=["GET", "POST"])
+def reset(id):
+    if request.method == "GET":
+        return render_template("auth/reset.html")
+    else:
+        if request.form["password"] == request.form["confirm"]:
+            hashed = generate_password_hash(request.form["password"])
+            getemail = db.execute("SELECT email FROM forgot WHERE id=:id", id=id)
+            getemail = getemail[0]["email"]
+
+            db.execute("UPDATE users SET password=:hashed WHERE email=:email", hashed=hashed, email=getemail)
+
+            return message("Passwords changed.")
+        else:
+            return apology("Passwords didn't match.")

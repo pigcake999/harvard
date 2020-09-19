@@ -9,14 +9,18 @@
     <form method="post" id="mainForm" style="padding-top: 40px;">
         <div class="form-row">
         <div class="form-group col-md-4">
-            <label for="postName">Title (alphanumeric)</label>
-            <input name="title" type="text" patten="^[a-zA-Z0-9_]*$" class="form-control" id="blogName">
+            <label for="postName">Link (alphanumeric)</label>
+            <input name="link" type="text" patten="^[a-zA-Z0-9_]*$" class="form-control" id="blogName">
         </div>
         </div>
         <p class="small">https://speakup.ml/blogs/{{name}}/posts/<span id="urlBlogName" style="color:#2ecc71; font-weight: bold;" class="blogName"></span></p>
         <div class="form-group">
-        <label for="inputDesc">Blurb</label>
-        <input name="blurb" type="text" class="form-control" id="inputDesc" placeholder="A brief explanation of the post..">
+            <label for="inputDesc">Title</label>
+            <input name="title" type="text" class="form-control" id="inputDesc" placeholder="Title of your post..">
+        </div>
+        <div class="form-group">
+            <label for="inputDesc">Blurb</label>
+            <input name="blurb" type="text" class="form-control" id="inputDesc" placeholder="A brief explanation of the post..">
         </div>
         <div class="form-group">
             <textarea name="markdown" id="editor" cols="50" rows="10">

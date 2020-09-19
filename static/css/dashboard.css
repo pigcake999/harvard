@@ -4,6 +4,7 @@
     border-radius: 2px;
     max-width: 40vw;
     font-family: Montserrat;
+    cursor: pointer;
 }
 
 .blogName {

@@ -6,12 +6,17 @@
 
 {% block main %}
 <div style="font-family: Montserrat, sans-serif;" class="container">
-    <h1 style="margin: 20px 0;">Editing {{ name }}</h1>
+    <h1 style="margin: 20px 0;">Editing <a href="/blogs/{{ name }}">{{ name }}</a></h1>
     
     <div id="blogPosts">
         <h3 style="font-size: 22px;">Posts</h3>
         <a style="margin-right: 15px;" class="btn btn-primary" href="/blogs/test/posts/create">Create a post</a>
         <button class="btn btn-danger" data-toggle="modal" data-target="#deletepost">Delete a post</button>
+    </div>
+    <hr>
+    <div id="danger area">
+        <h3 style="font-size: 22px;">Danger area</h3>
+        <a href="/delete/{{ name }}" class="btn btn-danger">Delete '{{ name }}'</a>
     </div>
 </div>
 
@@ -28,7 +33,7 @@
           <ul class="blogPosts">
               {% for post in posts %}
                 <li class="blogPost">
-                    {{ post.title }}
+                    <a style="color:red !important" href="/delete/{{name}}/{{post.link}}">{{ post.title }}</a>
                 </li>
               {% endfor %}
           </ul>
@@ -52,6 +57,10 @@ function changed() {
     } else {
         $("#createBlog").prop("disabled", "true");
     }
+}
+
+function deleteit(posttitle, name){
+    window.location.href = "/delete/" + name + "/" + posttitle
 }
 
 window.onload= function(){
