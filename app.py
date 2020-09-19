@@ -126,7 +126,7 @@ def register():
         rows = db.execute("SELECT * FROM users WHERE email = :email", email=details["email"])
 
         if len(rows) > 0:
-            return jsonify(error="An account already exists with that email!"), 401
+            return jsonify(error="Someone is already using that email!"), 401
 
         # Hash password
         hashed = generate_password_hash(details["password"])

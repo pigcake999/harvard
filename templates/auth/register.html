@@ -7,13 +7,21 @@
 {% block extracss %}
 	<link rel="stylesheet" href="static/css/Login-Form-Clean.css">
 	<link rel="stylesheet" href="static/css/animate.min.css">
+	<style>
+		@media (min-width:801px) {
+			body {
+				overflow-y: hidden;
+			}
+		}
+	</style>
 {% endblock %}
 
 {% block main %}
   <div class="login-clean">
     <form>
       <h2 class="sr-only">Register Form</h2>
-      <div class="illustration"><i class="icon ion-speakerphone"></i></div>
+	  <div class="illustration"><i class="icon ion-speakerphone"></i></div>
+	  <p style="color:red; text-align: center;" class="small" id="error"></p>
       <div class="form-group"><input class="form-control" id="name" type="text" name="name" placeholder="Name"></div>
       <div class="form-group"><input class="form-control" id="email" type="email" name="email" placeholder="Email"></div>
       <div class="form-group"><input class="form-control" id="password" type="password" name="password" placeholder="Password"></div>
@@ -39,10 +47,12 @@
 			},
 			error: function(r) {
 					setTimeout(function() {
-					$("#loginbtn").removeClass('animated shake');
+					$("#registerbtn").removeClass('animated shake');
 					}, 1000)
-					$("#loginbtn").addClass('animated shake')
+					$("#registerbtn").addClass('animated shake')
 					console.log(r)
+
+					$("#error").text(r.responseJSON.error);
 			}
 			});
 		});
