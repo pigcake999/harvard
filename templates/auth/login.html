@@ -33,7 +33,7 @@
 			contentType: "application/json",
 			data: '{ "email": "'+ $("#email").val() +'", "password": "'+ $("#password").val() +'" }',
 			success: function(r) {
-				window.location.href = "http://localhost:5000/dashboard";
+				window.location.href = "/dashboard";
 			},
 			error: function(r) {
 					$("#error").text(r.responseJSON.error);

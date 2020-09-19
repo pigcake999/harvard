@@ -35,7 +35,7 @@
 			data: '{ "name": "' + $("#name").val() + '", "email": "'+ $("#email").val() +'", "password": "'+ $("#password").val() +'", "confirm-password": "'+ $("#confirmpassword").val() +'" }',
 			success: function(r) {
         console.log(r)
-				window.location.href = "http://localhost:5000/dashboard";
+				window.location.href = "/dashboard";
 			},
 			error: function(r) {
 					setTimeout(function() {
