@@ -2,6 +2,26 @@
   padding: 50px 0;
   color: #f0f9ff;
   background-color: #282d32;
+  height: 160px !important;
+}
+
+.main-container {
+  min-height: calc(100vh - 160px) !important;
+}
+
+.footer,
+.push {
+  height: 160px;
+}
+
+body {
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+.footer-dark {
+  grid-row-start: 2;
+  grid-row-end: 3;
 }
 
 .footer-dark h3 {

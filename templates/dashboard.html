@@ -6,19 +6,15 @@
 
 {% block main %}
     <div style="padding-top: 40pt;" class="container">
-        <h2><strong>Blogs</strong></h2>
+        <h2>Blogs</h2>
 
         <ul style="list-style-type: none; margin: 0; padding: 2px;" id="blogsList">
             {% if blogsLength > 0 %}
                 {% for blog in blogs %}
                     <li onclick="console.log('blog clicked')" class="blog">
-                        <strong class="blogTitle">{{ blog.title }}</strong>
+                        <strong class="blogName">{{ blog.id }}</strong>
                         <p class="small blogBlurb">{{ blog.description }}</p>
-                        <ul class="categories">
-                            {% for category in blog.categories %}
-                                <li>{{ category }}</li>
-                            {% endfor %}
-                        </ul>
+                        <div class="blogCategory">{{ blog.category }}</div>
                     </li>
                 {% endfor %}
             {% else %}
@@ -27,4 +23,8 @@
             {% endif %}
         </ul>
     </div>
+{% endblock %}
+
+{% extracss %}
+<link rel="stylesheet" href="/static/css/dashboard.css">
 {% endblock %}
