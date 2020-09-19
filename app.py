@@ -65,7 +65,7 @@ def message(msg):
 @app.route("/")
 def index():
     if session.get("user_id"):
-        return redirect(url_for("dashboard"))
+        return redirect("/dashboard")
     return render_template("index.html")
 
 @app.route("/login", methods=["GET", "POST"])
@@ -170,7 +170,7 @@ def dashboard():
         blogs = db.execute("SELECT * FROM blogs WHERE user_id = :user_id", user_id=session.get("user_id"))
         return render_template("dashboard.html", blogs=blogs, blogsLength=len(blogs))
     else:
-        return redirect(url_for("login"))
+        return redirect("/login")
 
 @app.route("/blogs/create", methods=["GET", "POST"])
 def blog():
@@ -179,7 +179,7 @@ def blog():
             
             if len(availability) == 0 and request.form["name"] not in restricted:
                 db.execute("INSERT INTO blogs (id, user_id, description, category) VALUES (:name, :user_id, :description, :category)", name=request.form["name"].lower(), user_id=session.get("user_id"), description=request.form["description"], category=request.form["category"])
-                return redirect(url_for("dashboard"))
+                return redirect("/dashboard")
             else:
                 return apology("That blog name is not available.")
         else: 
@@ -229,7 +229,7 @@ def blog():
                 ]
                 return render_template("createblog.html", categories=categories)
             else:
-                return redirect(url_for("login"))
+                return redirect("/login")
 
 @app.route("/blogs/edit/<name>")
 def edit(name):
@@ -260,7 +260,7 @@ def createpost(name):
                 with open(os.getcwd() + "/posts/" + str(getpost[0]["id"]) + ".md", "w+") as f:
                     f.write(post["markdown"])
 
-                return redirect(url_for("blogs/" + name + "/posts/" + post["link"]))
+                return redirect("/blogs/" + name + "/posts/" + post["link"])
     else:
         return apology("You don't own that blog!")
 
