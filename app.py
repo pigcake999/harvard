@@ -349,7 +349,7 @@ def forgot():
                                 }
                             ],
                             "Subject": "Reset your password.",
-                            "HTMLPart": "<h3>Reset your password</h3><a href='http://localhost:5000/reset/"+str(getid)+"'>http://localhost:5000/reset/"+str(getid)+"</a>",
+                            "HTMLPart": "<h3>Reset your password</h3><a href='http://cbrfinalproject.herokuapp.com/reset/"+str(getid)+"'>http://localhost:5000/reset/"+str(getid)+"</a>",
                             }
                     ]
                 }
