@@ -87,6 +87,8 @@ I made sure the website is able to handle concurrent HTTP requests and provide a
 
 This means it can scale to a much bigger level than intended while keeping a decent speed and still working.
 
+I used **Mailjet** as an API for emails to allow to send multiple emails at once and have less risk of any mail not sending, I was originally planning on using pythons default *SMTP* library but decided against it purely for allowing the website to grow with user demand.
+
 !(Google Lighthouse Performance Test)[lighthouseperformance.PNG]
 
 ## SEO (Search Engine Optimization)
