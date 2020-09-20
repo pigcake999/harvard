@@ -126,13 +126,13 @@ I'm happy with the score but thankful CS50 has shown me areas I need to improve 
 
 ## Versioning
 
-I use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/pigcake999/ambidex/tags). 
+I use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/pigcake999/harvard/tags). 
 
 ## Authors
 
 * **Christian Barton Randall** - *Coding and Maintaining* - [pigcake999](https://github.com/pigcake999)
 
- If I ever add any contributors they will appear [here](https://github.com/pigcake999/ambidex/contributors).
+ If I ever add any contributors they will appear [here](https://github.com/pigcake999/harvard/contributors).
  
 ## License
 
