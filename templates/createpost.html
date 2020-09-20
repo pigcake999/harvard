@@ -41,9 +41,8 @@ function changed() {
     const bool1 = /^[a-zA-Z0-9_]*$/.test(document.getElementById("blogName").value) && document.getElementById("blogName").value != "";
     const bool2 = document.getElementById("inputDesc").value != "";
     const val = $.trim($("#editor").val());
-    const bool3 = val != "";
 
-    if (bool1 && bool2 && bool3){
+    if (bool1 && bool2){
         $("#createPost").removeAttr("disabled");
     } else {
         $("#createPost").prop("disabled", "true");
@@ -86,7 +85,6 @@ window.onload= function(){
     document.getElementById("inputDesc2").addEventListener("keyup", changed);
     document.getElementById("blogName").addEventListener("change", changed);
     document.getElementById("blogName").addEventListener("keyup", changed);
-    setInterval(changed, 3000)
 }
 
 nameInput = document.getElementById("blogName");
