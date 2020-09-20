@@ -18,7 +18,7 @@
 
 {% block main %}
   <div class="login-clean">
-    <form>
+    <form onsubmit="return false;">
       <h2 class="sr-only">Register Form</h2>
 	  <div class="illustration"><i class="icon ion-speakerphone"></i></div>
 	  <p style="color:red; text-align: center;" class="small" id="error"></p>
@@ -26,7 +26,7 @@
       <div class="form-group"><input class="form-control" id="email" type="email" name="email" placeholder="Email"></div>
       <div class="form-group"><input class="form-control" id="password" type="password" name="password" placeholder="Password"></div>
       <div class="form-group"><input class="form-control" id="confirmpassword" type="password" name="confirm-password" placeholder="Password (again)"></div>
-      <div class="form-group"><button id="registerbtn" class="btn btn-primary btn-block" data-bs-hover-animate="shake"  type="button">Register</button></div>
+      <div class="form-group"><button id="registerbtn" class="btn btn-primary btn-block" data-bs-hover-animate="shake" onsubmit="return false;" type="submit">Register</button></div>
       <a class="forgot" href="/login">Already got an account?</a>
     </form>
   </div>
