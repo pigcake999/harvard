@@ -121,7 +121,8 @@ I'm happy with the score but thankful CS50 has shown me areas I need to improve 
 2. Create a file called `.env` in the main directory which includes `app.py`
 3. In this file type the code `FLASK_ENV=development`
 4. In case of Sequel Thread Errors change the environment to production with `FLASK_ENV=production`
-5. To run the project simply type `$ flask run`
+5. Install the dependencies using `$ pip install -r requirements.txt`
+6. To run the project simply type `$ flask run`
 
 ## Versioning
 
