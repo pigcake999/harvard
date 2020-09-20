@@ -54,6 +54,10 @@ document.getElementById("editor").addEventListener("click", edit);
 document.getElementById("editor").addEventListener("keyup", edit);
 document.getElementById("editor").addEventListener("change", edit);
 
+document.getElementById("editor").addEventListener("click", changed);
+document.getElementById("editor").addEventListener("keyup", changed);
+document.getElementById("editor").addEventListener("change", changed);
+
 function edit(){
     stackedit.openFile({
         name: 'Filename', // with an optional filename
@@ -72,14 +76,12 @@ const el = document.querySelector('textarea');
   });
 
 window.onload= function(){
-    document.getElementById("mainForm").addEventListener("change", changed);
-    document.getElementById("mainForm").addEventListener("keyup", changed);
+    document.getElementById("blogName").addEventListener("change", changed);
+    document.getElementById("blogName").addEventListener("keyup", changed);
     document.getElementById("inputDesc").addEventListener("change", changed);
     document.getElementById("inputDesc").addEventListener("keyup", changed);
     document.getElementById("inputDesc2").addEventListener("change", changed);
     document.getElementById("inputDesc2").addEventListener("keyup", changed);
-    document.getElementById("postName").addEventListener("change", changed);
-    document.getElementById("postName").addEventListener("keyup", changed);
 
     setInterval(changed, 3000)
 
