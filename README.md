@@ -76,7 +76,7 @@ I know it's not neccesary to *deploy / host* your website, but I decided it woul
 I learned how to:
 
 1. Make the website ready for production
-2. Use a PaaS (Platform as a Service) know as [Heroku](https://heroku.com)
+2. Use a PaaS (Platform as a Service) known as [Heroku](https://heroku.com)
 3. Debug errors that might not happen on a local machine in a development environment but will on a larger-scale production environment.
 
 You can now find the site on [speakup.cbrcode.com](http://speakup.cbrcode.com).
@@ -89,7 +89,7 @@ This means it can scale to a much bigger level than intended while keeping a dec
 
 I used **Mailjet** as an API for emails to allow to send multiple emails at once and have less risk of any mail not sending, I was originally planning on using pythons default *SMTP* library but decided against it purely for allowing the website to grow with user demand.
 
-!(Google Lighthouse Performance Test)[lighthouseperformance.PNG]
+![Google Lighthouse Performance Test](lighthouseperformance.PNG)
 
 ## SEO (Search Engine Optimization)
 
