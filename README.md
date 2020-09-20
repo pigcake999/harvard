@@ -58,7 +58,7 @@ such as
 
 - Editing and deleting blogs
 - Creating, editing, and deleting posts
-- Forgot password system which required a lot of effort which I will review later in the *README*
+- Forgot password system
 - And a security system only allowing you to control blogs you own while being able to view blogs and posts you don't
 
 Once this was complete I had most of the main functionality done.
